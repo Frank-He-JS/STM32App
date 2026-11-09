@@ -1,0 +1,32 @@
+# Keep every text file LF in the repo and in the working tree,
+# regardless of each machine's core.autocrlf or which git (Git for Windows,
+# MobaXterm/Cygwin, Linux, CubeIDE/EGit) touches it.
+* text=auto eol=lf
+
+# Source / project files (explicit, so detection never guesses wrong)
+*.c         text eol=lf
+*.h         text eol=lf
+*.s         text eol=lf
+*.S         text eol=lf
+*.ld        text eol=lf
+*.ioc       text eol=lf
+*.mxproject text eol=lf
+*.project   text eol=lf
+*.cproject  text eol=lf
+*.launch    text eol=lf
+*.prefs     text eol=lf
+*.xml       text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf
+
+# Binaries: never convert, never diff as text
+*.bin  binary
+*.hex  binary
+*.elf  binary
+*.axf  binary
+*.a    binary
+*.o    binary
+*.png  binary
+*.jpg  binary
+*.bmp  binary
+*.pdf  binary
