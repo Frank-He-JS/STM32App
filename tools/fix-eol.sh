@@ -15,8 +15,11 @@ dry_run=0
 
 # Tracked + untracked (not ignored) files whose working copy has CRLF,
 # limited to files git treats as text (binary/-text attrs are skipped).
+# Build output folders (Debug/, Release/) are left alone.
+exclude=(':(exclude)Debug/' ':(exclude)Release/')
 mapfile -t files < <(
-  { git ls-files --eol; git ls-files --others --exclude-standard --eol; } |
+  { git ls-files --eol -- . "${exclude[@]}"
+    git ls-files --others --exclude-standard --eol -- . "${exclude[@]}"; } |
     awk '($2 == "w/crlf" || $2 == "w/mixed") && $3 !~ /-text/ {
            sub(/^[^\t]*\t/, ""); print }'
 )
