@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -56,6 +58,13 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/* Retarget printf to USART1: syscalls.c _write() calls this for each char */
+int __io_putchar(int ch)
+{
+  uint8_t c = (uint8_t)ch;
+  HAL_UART_Transmit(&huart1, &c, 1, HAL_MAX_DELAY);
+  return ch;
+}
 
 /* USER CODE END 0 */
 
@@ -90,6 +99,13 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  /* Unbuffered stdout so printf output appears immediately, without waiting for '\n' */
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  const char *msg = "Hello\r\n";
+  HAL_UART_Transmit(&huart1, (const uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+
+  printf("printf via USART1 OK\r\n");
 
   /* USER CODE END 2 */
 
