@@ -141,5 +141,12 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
+/**
+  * @brief This function handles EXTI line 4 to 15 interrupts (B1 USER button on PC13).
+  */
+void EXTI4_15_IRQHandler(void)
+{
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+}
 
 /* USER CODE END 1 */

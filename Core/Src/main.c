@@ -45,6 +45,8 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+static volatile uint32_t button_presses;  /* set by EXTI ISR, consumed in main loop */
+static volatile uint32_t button_last_tick;
 
 /* USER CODE END PV */
 
@@ -64,6 +66,20 @@ int __io_putchar(int ch)
   uint8_t c = (uint8_t)ch;
   HAL_UART_Transmit(&huart1, &c, 1, HAL_MAX_DELAY);
   return ch;
+}
+
+/* B1 (blue USER button, PC13) is active-high on Nucleo-G0: rising edge = press */
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_PIN_13)
+  {
+    uint32_t now = HAL_GetTick();
+    if (now - button_last_tick > 50)  /* 50 ms debounce */
+    {
+      button_last_tick = now;
+      button_presses++;
+    }
+  }
 }
 
 /* USER CODE END 0 */
@@ -107,6 +123,8 @@ int main(void)
 
   printf("printf via USART1 OK\r\n");
 
+  uint32_t presses_reported = 0;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,6 +134,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    if (button_presses != presses_reported)
+    {
+      presses_reported = button_presses;
+      printf("Button clicked (%lu) at %lu ms\r\n",
+             (unsigned long)presses_reported, (unsigned long)button_last_tick);
+    }
   }
   /* USER CODE END 3 */
 }
@@ -276,6 +300,14 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* The .ioc has PC13 as GPIO_Output; it is the B1 USER button, so re-configure
+     it as a rising-edge EXTI input. Better: set PC13 to GPIO_EXTI13 in the .ioc. */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;  /* board has an external pull-down */
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
